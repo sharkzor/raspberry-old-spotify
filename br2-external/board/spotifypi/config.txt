@@ -1,0 +1,17 @@
+# SpotifyPi - Raspberry Pi 2 firmware configuration.
+# This file lives on the FAT boot partition and can be edited from any PC.
+
+start_file=start_cd.elf
+fixup_file=fixup_cd.dat
+kernel=zImage
+gpu_mem=16
+disable_overscan=1
+disable_splash=1
+boot_delay=0
+
+# Onboard (PWM) audio off, I2S DAC on.
+dtparam=audio=off
+dtparam=i2s=on
+# HiFiBerry DAC (PCM5102A) and compatibles. For other boards, replace with
+# e.g. hifiberry-dacplus, iqaudio-dacplus, ... (all overlays are included)
+dtoverlay=hifiberry-dac

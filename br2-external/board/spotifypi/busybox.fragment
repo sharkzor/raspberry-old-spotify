@@ -1,0 +1,11 @@
+CONFIG_NTPD=y
+# CONFIG_FEATURE_NTPD_SERVER is not set
+# CONFIG_FEATURE_NTPD_CONF is not set
+# CONFIG_CROND is not set
+# CONFIG_DNSD is not set
+# CONFIG_INETD is not set
+# CONFIG_HTTPD is not set
+# CONFIG_TELNETD is not set
+# CONFIG_FTPD is not set
+# CONFIG_TFTPD is not set
+# CONFIG_UDHCPD is not set

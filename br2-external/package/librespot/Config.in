@@ -1,0 +1,13 @@
+config BR2_PACKAGE_LIBRESPOT
+	bool "librespot"
+	depends on BR2_PACKAGE_HOST_RUSTC_TARGET_ARCH_SUPPORTS
+	depends on BR2_TOOLCHAIN_HAS_THREADS
+	select BR2_PACKAGE_HOST_RUSTC
+	select BR2_PACKAGE_ALSA_LIB
+	select BR2_PACKAGE_ALSA_LIB_PCM
+	select BR2_PACKAGE_ALSA_LIB_MIXER
+	help
+	  Open source Spotify Connect client (ALSA backend, built-in
+	  mDNS discovery, rustls TLS with compiled-in root certs).
+
+	  https://github.com/librespot-org/librespot

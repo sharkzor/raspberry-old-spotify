@@ -1,0 +1,10 @@
+# <file system>	<mount pt>	<type>	<options>				<dump>	<pass>
+/dev/root	/		ext4	ro,noauto				0	0
+proc		/proc		proc	defaults				0	0
+devpts		/dev/pts	devpts	defaults,gid=5,mode=620,ptmxmode=0666	0	0
+tmpfs		/dev/shm	tmpfs	mode=1777,nosuid,nodev			0	0
+tmpfs		/tmp		tmpfs	mode=1777,nosuid,nodev,size=32m		0	0
+tmpfs		/run		tmpfs	mode=0755,nosuid,nodev,size=16m		0	0
+sysfs		/sys		sysfs	defaults				0	0
+# Settings partition: read-only; the web UI remounts it rw only while saving.
+/dev/mmcblk0p3	/data		ext4	ro,noatime,nodev,nosuid,noexec		0	0

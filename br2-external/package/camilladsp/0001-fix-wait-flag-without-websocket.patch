@@ -1,0 +1,22 @@
+From: SpotifyPi <spotifypi@localhost>
+Subject: [PATCH] Don't panic on missing "wait" arg when built without websocket
+
+The --wait option is only defined with the websocket feature, but its value
+is read unconditionally, so clap panics at startup.
+
+---
+ src/bin.rs | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/bin.rs b/src/bin.rs
+--- a/src/bin.rs
++++ b/src/bin.rs
+@@ -1097,7 +1097,7 @@
+         }
+     });
+ 
+-    let wait = matches.get_flag("wait");
++    let wait = matches!(matches.try_get_one::<bool>("wait"), Ok(Some(true)));
+ 
+     let capture_status = Arc::new(RwLock::new(CaptureStatus {
+         measured_samplerate: 0,

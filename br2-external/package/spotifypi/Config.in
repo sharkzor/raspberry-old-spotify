@@ -1,0 +1,8 @@
+config BR2_PACKAGE_SPOTIFYPI
+	bool "spotifypi"
+	depends on BR2_PACKAGE_HOST_GO_TARGET_ARCH_SUPPORTS
+	depends on BR2_TOOLCHAIN_HAS_THREADS
+	select BR2_PACKAGE_HOST_GO
+	help
+	  Web configuration UI and process launcher for librespot and
+	  CamillaDSP.

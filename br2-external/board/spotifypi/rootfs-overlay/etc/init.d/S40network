@@ -1,0 +1,16 @@
+#!/bin/sh
+# Ethernet via DHCP. udhcpc keeps retrying in the background, so booting
+# without a cable (or before the router is up) recovers by itself.
+case "$1" in
+start)
+	ip link set lo up
+	ip addr add 127.0.0.1/8 dev lo 2>/dev/null
+	ip link set eth0 up 2>/dev/null
+	udhcpc -b -S -t 5 -T 3 -A 10 -i eth0 -x hostname:"$(hostname)" \
+		-p /run/udhcpc.eth0.pid >/dev/null 2>&1
+	;;
+stop)
+	[ -f /run/udhcpc.eth0.pid ] && kill "$(cat /run/udhcpc.eth0.pid)" 2>/dev/null
+	;;
+esac
+exit 0

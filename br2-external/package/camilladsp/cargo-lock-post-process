@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+# Buildroot download post-process: upstream CamillaDSP does not ship a
+# Cargo.lock, but Buildroot vendors with --locked. Inject our pinned lock file,
+# then hand over to Buildroot's regular cargo post-process.
+set -e
+output=
+args=("$@")
+while getopts "n:o:m:" OPT; do
+	case "${OPT}" in
+	o) output="${OPTARG}" ;;
+	*) ;;
+	esac
+done
+lock="$(dirname "$(readlink -f "$0")")/Cargo.lock"
+if ! tar tf "${output}" | grep -q '^[^/]*/VENDOR'; then
+	tmp="$(mktemp -d)"
+	tar xf "${output}" -C "${tmp}"
+	top="$(ls "${tmp}")"
+	[ -e "${tmp}/${top}/Cargo.lock" ] || cp "${lock}" "${tmp}/${top}/Cargo.lock"
+	tar czf "${output}" -C "${tmp}" "${top}"
+	rm -rf "${tmp}"
+fi
+exec "${BR_TOPDIR}/support/download/cargo-post-process" "${args[@]}"

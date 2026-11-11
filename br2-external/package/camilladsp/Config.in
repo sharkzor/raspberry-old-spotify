@@ -1,0 +1,13 @@
+config BR2_PACKAGE_CAMILLADSP
+	bool "camilladsp"
+	depends on BR2_PACKAGE_HOST_RUSTC_TARGET_ARCH_SUPPORTS
+	depends on BR2_TOOLCHAIN_HAS_THREADS
+	select BR2_PACKAGE_HOST_RUSTC
+	select BR2_PACKAGE_ALSA_LIB
+	select BR2_PACKAGE_ALSA_LIB_PCM
+	select BR2_PACKAGE_ALSA_LIB_MIXER
+	help
+	  Audio DSP engine (used here for parametric EQ). Built with
+	  the ALSA backend only, without the websocket server.
+
+	  https://github.com/HEnquist/camilladsp

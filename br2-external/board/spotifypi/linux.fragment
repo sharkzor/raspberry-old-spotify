@@ -1,0 +1,16 @@
+# Things a headless Spotify endpoint never needs
+# CONFIG_BT is not set
+# CONFIG_NFC is not set
+# CONFIG_CAN is not set
+# CONFIG_HAMRADIO is not set
+# CONFIG_MEDIA_SUPPORT is not set
+# CONFIG_INPUT_JOYSTICK is not set
+# CONFIG_INPUT_TABLET is not set
+# CONFIG_INPUT_TOUCHSCREEN is not set
+# CONFIG_IIO is not set
+# CONFIG_NFS_FS is not set
+# CONFIG_CIFS is not set
+CONFIG_SND_ALOOP=m
+CONFIG_SND_BCM2708_SOC_HIFIBERRY_DAC=m
+CONFIG_BCM2835_WDT=y
+CONFIG_HW_RANDOM_BCM2835=y

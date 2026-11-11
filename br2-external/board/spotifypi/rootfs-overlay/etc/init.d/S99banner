@@ -1,0 +1,14 @@
+#!/bin/sh
+# Print the web UI address on the HDMI/serial console once DHCP is done.
+[ "$1" = start ] || exit 0
+(
+	for i in $(seq 1 60); do
+		ip=$(ip -4 -o addr show eth0 2>/dev/null | awk '{print $4}' | cut -d/ -f1)
+		[ -n "$ip" ] && break
+		sleep 2
+	done
+	msg="SpotifyPi web UI: http://${ip:-<no network>}/"
+	echo "$msg" > /dev/console
+	echo "$msg" > /dev/tty1
+) </dev/null >/dev/null 2>&1 &
+exit 0

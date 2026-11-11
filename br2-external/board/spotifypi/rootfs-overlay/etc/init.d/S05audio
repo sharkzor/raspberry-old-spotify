@@ -1,0 +1,9 @@
+#!/bin/sh
+# ALSA loopback (librespot -> CamillaDSP) and the I2S DAC driver.
+case "$1" in
+start)
+	modprobe snd-aloop index=7 pcm_substreams=1 id=Loopback
+	modprobe snd-soc-hifiberry-dac 2>/dev/null
+	;;
+esac
+exit 0

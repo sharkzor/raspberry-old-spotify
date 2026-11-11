@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SpotifyPi</title>
+<link rel="stylesheet" href="style.css">
+<link rel="icon" href="data:,">
+</head>
+<body>
+<header>
+  <h1><span class="logo">●</span> SpotifyPi</h1>
+  <div id="svc" class="svc"></div>
+</header>
+
+<main>
+  <section id="nowplaying" class="card np">
+    <img id="np-cover" alt="" hidden>
+    <div class="np-info">
+      <div id="np-state" class="muted">Idle</div>
+      <div id="np-title" class="np-title">Nothing playing</div>
+      <div id="np-artist" class="muted"></div>
+      <div id="np-extra" class="muted small"></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Spotify Connect</h2>
+    <form id="spotify-form" class="grid">
+      <label>Device name
+        <input name="name" maxlength="64" required>
+      </label>
+      <label>Bitrate
+        <select name="bitrate">
+          <option value="96">96 kbps (low)</option>
+          <option value="160">160 kbps (normal)</option>
+          <option value="320">320 kbps (very high)</option>
+        </select>
+      </label>
+      <label>Initial volume <output id="vol-out"></output>
+        <input name="initial_volume" type="range" min="0" max="100" step="1">
+      </label>
+      <label>Volume control
+        <select name="volume_ctrl">
+          <option value="log">Logarithmic (app controls volume)</option>
+          <option value="cubic">Cubic (app controls volume)</option>
+          <option value="linear">Linear (app controls volume)</option>
+          <option value="fixed">Fixed 100% (bit-perfect, use amplifier volume)</option>
+        </select>
+      </label>
+      <label>Device type (icon in app)
+        <select name="device_type">
+          <option value="speaker">Speaker</option>
+          <option value="avr">AV receiver</option>
+          <option value="audiodongle">Audio dongle</option>
+          <option value="stb">Set-top box</option>
+          <option value="tv">TV</option>
+          <option value="computer">Computer</option>
+        </select>
+      </label>
+      <div class="checks">
+        <label class="check"><input type="checkbox" name="normalisation"> Volume normalisation</label>
+        <label class="check"><input type="checkbox" name="autoplay"> Autoplay similar songs</label>
+      </div>
+      <div class="actions"><button type="submit">Save &amp; restart Spotify Connect</button></div>
+    </form>
+  </section>
+
+  <section class="card">
+    <div class="row space">
+      <h2>Equalizer</h2>
+      <label class="switch"><input type="checkbox" id="eq-enabled"> <span>Enabled</span></label>
+    </div>
+    <canvas id="eq-plot" width="900" height="260"></canvas>
+    <div class="row wrap">
+      <label>Preset
+        <select id="eq-preset"></select>
+      </label>
+      <label>Preamp (dB)
+        <input id="eq-preamp" type="number" step="0.1" min="-40" max="20">
+      </label>
+      <label class="check"><input type="checkbox" id="eq-autopreamp"> Auto preamp (prevent clipping)</label>
+    </div>
+    <div class="table-wrap">
+      <table id="eq-table">
+        <thead><tr><th>On</th><th>Type</th><th>Freq (Hz)</th><th>Gain (dB)</th><th></th><th>Q</th><th></th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <div class="row wrap">
+      <button type="button" id="eq-add" class="secondary">+ Add filter</button>
+      <button type="button" id="eq-clear" class="secondary">Clear</button>
+      <span class="spacer"></span>
+      <label class="check"><input type="checkbox" id="eq-live" checked> Live preview</label>
+      <button type="button" id="eq-revert" class="secondary">Revert to saved</button>
+      <button type="button" id="eq-save">Save EQ</button>
+    </div>
+    <p id="eq-unsaved" class="warn small" hidden>EQ changes are active but not saved — they are lost on reboot.</p>
+
+    <details>
+      <summary>Import / export PEQ (AutoEQ, REW, Equalizer APO)</summary>
+      <p class="small muted">Paste or load a parametric EQ file, e.g. AutoEQ's <code>ParametricEQ.txt</code>:<br>
+        <code>Preamp: -6.2 dB<br>Filter 1: ON PK Fc 105 Hz Gain -2.4 dB Q 0.70</code></p>
+      <textarea id="peq-text" rows="8" spellcheck="false" placeholder="Preamp: -6.2 dB&#10;Filter 1: ON LSC Fc 105 Hz Gain 5.5 dB Q 0.71&#10;Filter 2: ON PK Fc 2000 Hz Gain -3.0 dB Q 1.40"></textarea>
+      <div class="row wrap">
+        <input type="file" id="peq-file" accept=".txt,.cfg,text/plain">
+        <button type="button" id="peq-import" class="secondary">Import</button>
+        <span class="spacer"></span>
+        <a href="api/eq/export" class="button secondary" download>Export current EQ</a>
+      </div>
+    </details>
+  </section>
+
+  <section class="card">
+    <h2>System</h2>
+    <form id="output-form" class="grid">
+      <label>Audio output
+        <select name="output_device" id="output-device"></select>
+      </label>
+      <label>Sample format
+        <select name="output_format">
+          <option value="S32_LE">32 bit (S32_LE)</option>
+          <option value="S16_LE">16 bit (S16_LE)</option>
+        </select>
+      </label>
+      <div class="actions"><button type="submit" class="secondary">Save output</button></div>
+    </form>
+    <form id="password-form" class="grid">
+      <label>Web UI password <span id="pw-state" class="muted small"></span>
+        <input name="password" type="password" autocomplete="new-password" placeholder="empty = no password">
+      </label>
+      <div class="actions"><button type="submit" class="secondary">Set password</button></div>
+    </form>
+    <div class="row wrap">
+      <div id="sysinfo" class="muted small"></div>
+      <span class="spacer"></span>
+      <button type="button" id="reboot" class="danger">Reboot</button>
+    </div>
+    <p class="small muted">The SD card is read-only during normal operation; it is only written for a moment when you save settings. Pulling the power is safe.</p>
+  </section>
+</main>
+
+<div id="toast" hidden></div>
+<script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,3 @@
+source "$BR2_EXTERNAL_SPOTIFYPI_PATH/package/librespot/Config.in"
+source "$BR2_EXTERNAL_SPOTIFYPI_PATH/package/camilladsp/Config.in"
+source "$BR2_EXTERNAL_SPOTIFYPI_PATH/package/spotifypi/Config.in"
