@@ -8,3 +8,5 @@ tmpfs		/run		tmpfs	mode=0755,nosuid,nodev,size=16m		0	0
 sysfs		/sys		sysfs	defaults				0	0
 # Settings partition: read-only; the web UI remounts it rw only while saving.
 /dev/mmcblk0p3	/data		ext4	ro,noatime,nodev,nosuid,noexec		0	0
+# Boot partition (read-only): holds authorized_keys to enable SSH.
+/dev/mmcblk0p1	/boot		vfat	ro,noatime,nodev,nosuid,noexec,uid=0,gid=0,fmask=0133,dmask=0022	0	0

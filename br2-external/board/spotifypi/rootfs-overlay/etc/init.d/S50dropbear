@@ -1,0 +1,27 @@
+#!/bin/sh
+# SSH is OFF unless the boot partition contains a file named authorized_keys.
+# Key-only login (no passwords), no port forwarding. The host key is created
+# once on the first boot and kept on /data so it survives reboots.
+KEYS=/boot/authorized_keys
+HOSTKEY=/data/ssh_host_ed25519_key
+PIDFILE=/run/dropbear.pid
+
+case "$1" in
+start)
+	[ -s "$KEYS" ] || { echo "SSH disabled (no $KEYS)"; exit 0; }
+	if [ ! -s "$HOSTKEY" ]; then
+		mount -o remount,rw /data
+		dropbearkey -t ed25519 -f "$HOSTKEY" >/dev/null 2>&1
+		sync
+		mount -o remount,ro /data
+	fi
+	printf "Starting dropbear sshd: "
+	start-stop-daemon -S -q -p "$PIDFILE" --exec /usr/sbin/dropbear -- \
+		-s -j -k -D /boot -r "$HOSTKEY" -P "$PIDFILE" -p 22 \
+		&& echo OK || echo FAIL
+	;;
+stop)
+	start-stop-daemon -K -q -p "$PIDFILE"
+	;;
+esac
+exit 0

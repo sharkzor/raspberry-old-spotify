@@ -7,7 +7,7 @@ A minimal, read-only Linux image that turns a **Raspberry Pi 2** (32-bit) with a
 * [librespot](https://github.com/librespot-org/librespot) 0.8.0 – Spotify Connect
 * [CamillaDSP](https://github.com/HEnquist/camilladsp) 4.1.3 – parametric EQ
 * `spotifypi` – a tiny Go web UI and service launcher (stdlib only)
-* Buildroot 2026.08.1, BusyBox init, no systemd, no SSH, no package manager
+* Buildroot 2026.08.1, BusyBox init, no systemd, no package manager, optional key-only SSH
 
 ## Flashing
 
@@ -47,6 +47,26 @@ it as `spotifypi`.
 
 You can cut power at any time, except during the second it takes to click Save.
 
+## SSH (optional, off by default)
+
+To enable SSH, put your **public key** in a file named `authorized_keys` on the
+SD card's `BOOT` (FAT) partition, e.g. on your PC after flashing:
+
+```sh
+cp ~/.ssh/id_ed25519.pub /Volumes/BOOT/authorized_keys
+```
+
+On the next boot Dropbear listens on port 22: root login with keys only, no
+passwords and no port forwarding. Without that file, no SSH server runs. The
+host key is generated once and stored on `/data`. Useful commands:
+
+```sh
+ssh root@<ip>
+tail -f /run/spotifypi/librespot.log   # also camilladsp.log, spotifypi.log
+```
+
+Logs live in RAM (also in the web UI under System → Logs) and vanish on reboot.
+
 ## Attack surface
 
 The only listening services are:
@@ -54,7 +74,8 @@ The only listening services are:
 * the web UI on port 80;
 * librespot's Spotify Connect (zeroconf/mDNS) ports.
 
-There is no SSH, telnet, cron, or httpd/inetd. The kernel is trimmed: no
+SSH only runs if you provide `authorized_keys` (see above); there is no telnet,
+cron, or httpd/inetd. The kernel is trimmed: no
 Bluetooth, NFC, CAN, media/V4L, NFS or CIFS. POST requests must be same-origin
 JSON. Set a web UI password if your LAN is not trusted.
 

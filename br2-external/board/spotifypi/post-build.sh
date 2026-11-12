@@ -11,4 +11,4 @@ done
 # so TLS certificate validation works right after boot.
 date -u +%s > "${TARGET_DIR}/etc/build-epoch"
 
-mkdir -p "${TARGET_DIR}/data"
+mkdir -p "${TARGET_DIR}/data" "${TARGET_DIR}/boot"
