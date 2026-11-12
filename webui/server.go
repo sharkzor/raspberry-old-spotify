@@ -11,6 +11,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"io/fs"
 	"log"
 	"net"
@@ -50,6 +51,7 @@ func serve(addr string) error {
 	mux.HandleFunc("GET /api/presets", func(w http.ResponseWriter, r *http.Request) { writeJSON(w, presets) })
 	mux.HandleFunc("GET /api/cards", func(w http.ResponseWriter, r *http.Request) { writeJSON(w, soundCards()) })
 	mux.HandleFunc("GET /api/eq/export", s.handleExport)
+	mux.HandleFunc("GET /api/logs", s.handleLogs)
 	mux.HandleFunc("POST /api/spotify", s.handleSpotify)
 	mux.HandleFunc("POST /api/eq", s.handleEQ)
 	mux.HandleFunc("POST /api/eq/parse", s.handleParse)
@@ -238,6 +240,18 @@ func (s *server) handleStatus(w http.ResponseWriter, r *http.Request) {
 		"settings_mounted": isMountpoint(dataDir),
 		"cpu_temp_c":       cpuTemp(),
 	})
+}
+
+func (s *server) handleLogs(w http.ResponseWriter, r *http.Request) {
+	name := r.URL.Query().Get("service")
+	switch name {
+	case "librespot", "camilladsp", "spotifypi":
+	default:
+		writeErr(w, http.StatusBadRequest, errors.New("unknown service"))
+		return
+	}
+	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+	io.WriteString(w, tailFile(logPath(name), 16<<10))
 }
 
 type spotifyReq struct {

@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"log"
 	"net"
 	"os"
@@ -63,7 +64,44 @@ func hasIPv4() bool {
 	return false
 }
 
-func clockSane() bool { return time.Now().Year() >= 2025 }
+// clockSane is true once ntpd reported a sync (see etc/ntpd-notify.sh).
+func clockSane() bool {
+	_, err := os.Stat(runDir + "/clock-synced")
+	return err == nil
+}
+
+func logPath(name string) string { return runDir + "/" + name + ".log" }
+
+// redirectLog sends stdout/stderr (inherited across exec) to a size-capped
+// file on tmpfs so the web UI can show it. Nothing is written to the SD card.
+func redirectLog(name string) {
+	os.MkdirAll(runDir, 0o755)
+	flags := os.O_CREATE | os.O_WRONLY | os.O_APPEND
+	if fi, err := os.Stat(logPath(name)); err == nil && fi.Size() > 256<<10 {
+		flags |= os.O_TRUNC
+	}
+	f, err := os.OpenFile(logPath(name), flags, 0o644)
+	if err != nil {
+		return
+	}
+	syscall.Dup3(int(f.Fd()), 1, 0)
+	syscall.Dup3(int(f.Fd()), 2, 0)
+	f.Close()
+	log.SetFlags(log.Ldate | log.Ltime)
+}
+
+func tailFile(path string, max int64) string {
+	f, err := os.Open(path)
+	if err != nil {
+		return ""
+	}
+	defer f.Close()
+	if fi, err := f.Stat(); err == nil && fi.Size() > max {
+		f.Seek(fi.Size()-max, 0)
+	}
+	b, _ := io.ReadAll(f)
+	return string(b)
+}
 
 func cardExists(id string) bool {
 	_, err := os.Stat("/proc/asound/" + id)
@@ -92,6 +130,7 @@ func execService(name, bin string, args []string) error {
 }
 
 func runLibrespot() error {
+	redirectLog("librespot")
 	time.Sleep(2 * time.Second) // throttle respawn loops
 	waitFor("network", 60*time.Second, hasIPv4)
 	waitFor("clock sync", 30*time.Second, clockSane)
@@ -103,6 +142,7 @@ func runLibrespot() error {
 }
 
 func runCamilla() error {
+	redirectLog("camilladsp")
 	time.Sleep(time.Second)
 	cfg := loadConfig()
 	waitFor("loopback device", 30*time.Second, func() bool { return cardExists("Loopback") })

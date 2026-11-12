@@ -136,6 +136,14 @@
       <span class="spacer"></span>
       <button type="button" id="reboot" class="danger">Reboot</button>
     </div>
+    <details id="logs">
+      <summary>Logs</summary>
+      <div class="row wrap">
+        <select id="log-service"><option>librespot</option><option>camilladsp</option><option>spotifypi</option></select>
+        <button type="button" id="log-refresh" class="secondary">Refresh</button>
+      </div>
+      <pre id="log-out" class="small"></pre>
+    </details>
     <p class="small muted">The SD card is read-only during normal operation; it is only written for a moment when you save settings. Pulling the power is safe.</p>
   </section>
 </main>

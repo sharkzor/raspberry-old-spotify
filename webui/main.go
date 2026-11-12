@@ -55,6 +55,7 @@ func main() {
 		if len(os.Args) > 2 {
 			addr = os.Args[2]
 		}
+		redirectLog("spotifypi")
 		err = serve(addr)
 	case "run-librespot":
 		err = runLibrespot()

@@ -233,6 +233,18 @@ async function refreshStatus() {
   } catch (e) { $("#svc").innerHTML = '<span class="pill bad">offline</span>'; }
 }
 
+// ---------------------------------------------------------------- logs
+async function loadLogs() {
+  try {
+    const out = $("#log-out");
+    out.textContent = (await api("logs?service=" + $("#log-service").value)) || "(empty)";
+    out.scrollTop = out.scrollHeight;
+  } catch (e) { toast(e.message); }
+}
+$("#log-refresh").addEventListener("click", loadLogs);
+$("#log-service").addEventListener("change", loadLogs);
+$("#logs").addEventListener("toggle", e => { if (e.target.open) loadLogs(); });
+
 // ---------------------------------------------------------------- init
 async function init() {
   const [cfg, ps] = await Promise.all([api("config"), api("presets")]);

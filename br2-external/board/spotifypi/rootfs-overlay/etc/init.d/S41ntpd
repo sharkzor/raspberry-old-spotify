@@ -4,7 +4,7 @@ start)
 	# No RTC on the Pi: never start earlier than the image build date.
 	now=$(date +%s); built=$(cat /etc/build-epoch 2>/dev/null || echo 0)
 	[ "$now" -lt "$built" ] && date -s "@$built" >/dev/null
-	ntpd -p 0.pool.ntp.org -p 1.pool.ntp.org -p 2.pool.ntp.org
+	ntpd -S /etc/ntpd-notify.sh -p 0.pool.ntp.org -p 1.pool.ntp.org -p 2.pool.ntp.org
 	;;
 stop)
 	killall ntpd 2>/dev/null
