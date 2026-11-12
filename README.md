@@ -1,7 +1,7 @@
 # SpotifyPi
 
 A minimal, read-only Linux image that turns a **Raspberry Pi 2** (32-bit) with a
-**HiFiBerry DAC** (or compatible PCM5102A board) into a dedicated
+**HiFiBerry DAC** (PCM5102A, or a PCM5122 DAC+ and compatible boards) into a dedicated
 **Spotify Connect** speaker.
 
 * [librespot](https://github.com/librespot-org/librespot) 0.8.0 – Spotify Connect
@@ -93,12 +93,19 @@ librespot uses software volume. When the EQ is disabled, CamillaDSP passes the
 audio through unchanged. Settings changes restart librespot. EQ changes reload
 CamillaDSP with SIGHUP and do not interrupt playback.
 
-### Other DACs
+### Choosing the DAC overlay
 
-Edit `br2-external/board/spotifypi/config.txt` (`dtoverlay=hifiberry-dac`)
-before building. You can also edit `config.txt` on the FAT boot partition of
-a flashed card, for example `dtoverlay=hifiberry-dacplus`. Then select the card
-in the web UI under System → Output.
+The default is `dtoverlay=hifiberry-dacplus` (PCM5122 boards, including many
+"HiFiBerry-compatible" clones). For a plain PCM5102A board use
+`hifiberry-dac`; for PCM5122 clones without onboard oscillators try
+`hifiberry-dacplus-std`. No sound with the wrong overlay is a classic symptom.
+
+Edit `config.txt` on the FAT `BOOT` partition from your PC, or on the running
+Pi:
+
+```sh
+mount -o remount,rw /boot && vi /boot/config.txt; sync; mount -o remount,ro /boot; reboot
+```
 
 ## Building
 

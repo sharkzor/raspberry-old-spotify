@@ -3,7 +3,9 @@
 case "$1" in
 start)
 	modprobe snd-aloop index=7 pcm_substreams=1 id=Loopback
+	# Harmless if the matching overlay is not active.
 	modprobe snd-soc-hifiberry-dac 2>/dev/null
+	modprobe snd-soc-hifiberry-dacplus 2>/dev/null
 	;;
 esac
 exit 0

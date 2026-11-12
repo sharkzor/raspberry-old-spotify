@@ -12,6 +12,9 @@ boot_delay=0
 # Onboard (PWM) audio off, I2S DAC on.
 dtparam=audio=off
 dtparam=i2s=on
-# HiFiBerry DAC (PCM5102A) and compatibles. For other boards, replace with
-# e.g. hifiberry-dacplus, iqaudio-dacplus, ... (all overlays are included)
-dtoverlay=hifiberry-dac
+# DAC overlay. Pick the one matching your board:
+#   hifiberry-dac          PCM5102A boards (no I2C control)
+#   hifiberry-dacplus      PCM5122 boards (DAC+, many clones such as NXEZ)
+#   hifiberry-dacplus-std  PCM5122 clones without onboard clock oscillators
+#   (others: iqaudio-dacplus, allo-boss-dac-pcm512x-audio, ...)
+dtoverlay=hifiberry-dacplus
