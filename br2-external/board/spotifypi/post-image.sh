@@ -5,6 +5,7 @@ GENIMAGE_TMP="${BUILD_DIR}/genimage.tmp"
 ROOTPATH_TMP="$(mktemp -d)"
 trap 'rm -rf "${ROOTPATH_TMP}"' EXIT
 rm -rf "${GENIMAGE_TMP}"
+cp "${BOARD_DIR}/dac.txt" "${BINARIES_DIR}/dac.txt"
 
 genimage \
 	--rootpath "${ROOTPATH_TMP}" \

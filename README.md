@@ -93,19 +93,18 @@ librespot uses software volume. When the EQ is disabled, CamillaDSP passes the
 audio through unchanged. Settings changes restart librespot. EQ changes reload
 CamillaDSP with SIGHUP and do not interrupt playback.
 
-### Choosing the DAC overlay
+### Choosing the DAC board
 
-The default is `dtoverlay=hifiberry-dacplus` (PCM5122 boards, including many
-"HiFiBerry-compatible" clones). For a plain PCM5102A board use
-`hifiberry-dac`; for PCM5122 clones without onboard oscillators try
-`hifiberry-dacplus-std`. No sound with the wrong overlay is a classic symptom.
+Pick your board in the web UI under **System → DAC board** and reboot:
 
-Edit `config.txt` on the FAT `BOOT` partition from your PC, or on the running
-Pi:
+* PCM5102A (HiFiBerry DAC and clones) → `hifiberry-dac`
+* PCM5122 DAC+ (HiFiBerry DAC+ and clones, e.g. NXEZ) → `hifiberry-dacplus` (default)
+* PCM5122 without onboard oscillators → `hifiberry-dacplus-std`
 
-```sh
-mount -o remount,rw /boot && vi /boot/config.txt; sync; mount -o remount,ro /boot; reboot
-```
+The wrong board is a classic cause of silence even though everything looks
+healthy. The selection is stored in `dac.txt` on the FAT `BOOT` partition
+(`config.txt` just contains `include dac.txt`), so you can also edit it from
+your PC. The boot partition is only written when you change the board.
 
 ## Building
 

@@ -204,3 +204,21 @@ func TestPassword(t *testing.T) {
 		t.Error("password verification broken")
 	}
 }
+
+func TestBoardSelection(t *testing.T) {
+	bootDir = t.TempDir()
+	if currentBoard() != "" {
+		t.Fatal("expected unknown board without dac.txt")
+	}
+	for _, b := range boards {
+		if err := setBoard(b.ID); err != nil {
+			t.Fatal(err)
+		}
+		if got := currentBoard(); got != b.ID {
+			t.Fatalf("got %q want %q", got, b.ID)
+		}
+	}
+	if err := setBoard("evil\ndtoverlay=x"); err == nil {
+		t.Fatal("unknown board accepted")
+	}
+}

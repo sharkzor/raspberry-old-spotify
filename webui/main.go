@@ -22,6 +22,7 @@ const (
 var (
 	dataDir = envOr("SPOTIFYPI_DATA", "/data")
 	runDir  = envOr("SPOTIFYPI_RUN", "/run/spotifypi")
+	bootDir = envOr("SPOTIFYPI_BOOT", "/boot")
 )
 
 func envOr(k, def string) string {

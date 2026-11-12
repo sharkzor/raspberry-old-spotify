@@ -233,6 +233,26 @@ async function refreshStatus() {
   } catch (e) { $("#svc").innerHTML = '<span class="pill bad">offline</span>'; }
 }
 
+// ---------------------------------------------------------------- DAC board
+async function loadBoards() {
+  const { boards, current } = await api("board");
+  const sel = $("#board");
+  sel.innerHTML = "";
+  if (!current) sel.add(new Option("(unknown – choose one)", ""));
+  for (const b of boards) sel.add(new Option(b.label, b.id));
+  sel.value = current;
+}
+$("#board-form").addEventListener("submit", async e => {
+  e.preventDefault();
+  const id = $("#board").value;
+  if (!id) return toast("Choose a board", true);
+  try {
+    const r = await api("board", { id });
+    $("#board-state").textContent = "· reboot required";
+    toast(r.status);
+  } catch (err) { toast(err.message, true); }
+});
+
 // ---------------------------------------------------------------- logs
 async function loadLogs() {
   try {
@@ -247,6 +267,7 @@ $("#logs").addEventListener("toggle", e => { if (e.target.open) loadLogs(); });
 
 // ---------------------------------------------------------------- init
 async function init() {
+  loadBoards().catch(() => {});
   const [cfg, ps] = await Promise.all([api("config"), api("presets")]);
   presets = ps;
   const sel = $("#eq-preset");

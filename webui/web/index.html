@@ -125,6 +125,13 @@
       </label>
       <div class="actions"><button type="submit" class="secondary">Save output</button></div>
     </form>
+    <form id="board-form" class="grid">
+      <label>DAC board <span id="board-state" class="muted small"></span>
+        <select name="board" id="board"></select>
+      </label>
+      <div class="actions"><button type="submit" class="secondary">Save board</button></div>
+      <p class="small muted">Takes effect after a reboot. Wrong board = silence.</p>
+    </form>
     <form id="password-form" class="grid">
       <label>Web UI password <span id="pw-state" class="muted small"></span>
         <input name="password" type="password" autocomplete="new-password" placeholder="empty = no password">

@@ -55,6 +55,8 @@ func serve(addr string) error {
 	mux.HandleFunc("POST /api/spotify", s.handleSpotify)
 	mux.HandleFunc("POST /api/eq", s.handleEQ)
 	mux.HandleFunc("POST /api/eq/parse", s.handleParse)
+	mux.HandleFunc("GET /api/board", s.handleGetBoard)
+	mux.HandleFunc("POST /api/board", s.handleSetBoard)
 	mux.HandleFunc("POST /api/output", s.handleOutput)
 	mux.HandleFunc("POST /api/password", s.handlePassword)
 	mux.HandleFunc("POST /api/reboot", s.handleReboot)
