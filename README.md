@@ -4,7 +4,8 @@ A minimal, read-only Linux image that turns a **Raspberry Pi 2** (32-bit) with a
 **HiFiBerry DAC** (PCM5102A, or a PCM5122 DAC+ and compatible boards) into a dedicated
 **Spotify Connect** speaker.
 
-* [librespot](https://github.com/librespot-org/librespot) 0.8.0 – Spotify Connect
+* [librespot](https://github.com/librespot-org/librespot) 0.8.0 – Spotify Connect (default image)
+* Optional: [Spotify Soloist](#spotify-soloist-variant-optional) – Spotify's own Connect SDK (`VARIANT=soloist`)
 * [CamillaDSP](https://github.com/HEnquist/camilladsp) 4.1.3 – parametric EQ
 * `spotifypi` – a tiny Go web UI and service launcher (stdlib only)
 * Buildroot 2026.08.1, BusyBox init, no systemd, no package manager, optional key-only SSH
@@ -106,7 +107,31 @@ healthy. The selection is stored in `dac.txt` on the FAT `BOOT` partition
 (`config.txt` just contains `include dac.txt`), so you can also edit it from
 your PC. The boot partition is only written when you change the board.
 
-## Building
+## Spotify Soloist variant (optional)
+
+[Spotify Soloist](https://developer.spotify.com/documentation/soloist) is Spotify's
+own Connect device SDK, an alternative to librespot. Build it with:
+
+```sh
+VARIANT=soloist ./build.sh   # -> output/spotifypi-soloist-rpi2.img.xz
+```
+
+Read these limits before you use it:
+
+* **Proprietary and time-limited.** Soloist is downloaded from Spotify's CDN at
+  build time and is not redistributed in this repo. Each build expires 90 days
+  after it was made, so rebuild to refresh it.
+* **Needs your own API key.** Create one in the Spotify Developer Dashboard and
+  enter it in the web UI. It is stored on the settings partition and is visible
+  to root through the process list.
+* **Pair once.** Press *Pair with Spotify*, then within 10 minutes start playback
+  in the Spotify app and pick SpotifyPi. The session is saved to `/data`. Token
+  refreshes after that live in RAM, so they are lost on reboot. The saved session
+  is restored at boot.
+* **No bitrate, volume-control or Now Playing settings.** Soloist does not expose
+  them. Output still goes through CamillaDSP, so the EQ and DAC board work the same.
+* Soloist's audio goes through PulseAudio into the ALSA loopback that CamillaDSP reads.
+
 
 You need Docker (on macOS, Docker Desktop with Rosetta). The build takes about
 1–2 hours the first time.

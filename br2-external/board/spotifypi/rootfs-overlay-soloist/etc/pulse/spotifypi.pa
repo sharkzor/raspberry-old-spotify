@@ -1,0 +1,8 @@
+# PulseAudio config for the Soloist variant (loaded with -n -F, so nothing
+# else is read). A single sink on the ALSA loopback; CamillaDSP does the EQ
+# and drives the DAC.
+load-module module-native-protocol-unix socket=/run/spotifypi/pulse/native auth-anonymous=1
+load-module module-alsa-sink device=hw:Loopback,0,0 sink_name=loopback format=s32le rate=44100 channels=2
+set-default-sink loopback
+# 100% sink volume: the Soloist volume setting controls the level.
+set-sink-volume loopback 65536

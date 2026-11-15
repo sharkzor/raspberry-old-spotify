@@ -30,7 +30,7 @@
       <label>Device name
         <input name="name" maxlength="64" required>
       </label>
-      <label>Bitrate
+      <label class="lp-only">Bitrate
         <select name="bitrate">
           <option value="96">96 kbps (low)</option>
           <option value="160">160 kbps (normal)</option>
@@ -40,7 +40,7 @@
       <label>Initial volume <output id="vol-out"></output>
         <input name="initial_volume" type="range" min="0" max="100" step="1">
       </label>
-      <label>Volume control
+      <label class="lp-only">Volume control
         <select name="volume_ctrl">
           <option value="log">Logarithmic (app controls volume)</option>
           <option value="cubic">Cubic (app controls volume)</option>
@@ -48,7 +48,7 @@
           <option value="fixed">Fixed 100% (bit-perfect, use amplifier volume)</option>
         </select>
       </label>
-      <label>Device type (icon in app)
+      <label class="lp-only">Device type (icon in app)
         <select name="device_type">
           <option value="speaker">Speaker</option>
           <option value="avr">AV receiver</option>
@@ -58,12 +58,28 @@
           <option value="computer">Computer</option>
         </select>
       </label>
-      <div class="checks">
+      <div class="checks lp-only">
         <label class="check"><input type="checkbox" name="normalisation"> Volume normalisation</label>
         <label class="check"><input type="checkbox" name="autoplay"> Autoplay similar songs</label>
       </div>
       <div class="actions"><button type="submit">Save &amp; restart Spotify Connect</button></div>
     </form>
+  </section>
+
+  <section class="card" id="soloist-card" hidden>
+    <h2>Spotify Soloist</h2>
+    <p class="small muted">Soloist uses your own Spotify Developer API key. Bitrate, volume and now-playing info are managed by Spotify. The key is visible to root via the process list.</p>
+    <form id="soloist-key-form" class="grid">
+      <label>API key <span id="soloist-key-state" class="muted small"></span>
+        <input name="api_key" type="password" autocomplete="off" spellcheck="false" placeholder="paste key, then save">
+      </label>
+      <div class="actions"><button type="submit" class="secondary">Save key</button></div>
+    </form>
+    <div class="row wrap">
+      <button type="button" id="soloist-pair">Pair with Spotify</button>
+      <span id="soloist-pair-state" class="small muted"></span>
+    </div>
+    <p class="small muted">Pairing is needed once. After pressing it, within 10 minutes start playback in the Spotify app and pick SpotifyPi as the device.</p>
   </section>
 
   <section class="card">
@@ -146,7 +162,7 @@
     <details id="logs">
       <summary>Logs</summary>
       <div class="row wrap">
-        <select id="log-service"><option>librespot</option><option>camilladsp</option><option>spotifypi</option></select>
+        <select id="log-service"><option>librespot</option><option>soloist</option><option>pulseaudio</option><option>camilladsp</option><option>spotifypi</option></select>
         <button type="button" id="log-refresh" class="secondary">Refresh</button>
       </div>
       <pre id="log-out" class="small"></pre>

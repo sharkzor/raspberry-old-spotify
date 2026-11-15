@@ -3,7 +3,7 @@
 set -eu
 
 # Services we don't want (crond, telnet, httpd, seed file writer, ...)
-for s in S01seedrng S20seedrng S50crond S50telnet S90httpd S41ifplugd; do
+for s in S01seedrng S20seedrng S50crond S50telnet S90httpd S41ifplugd S50pulseaudio; do
 	rm -f "${TARGET_DIR}/etc/init.d/${s}"
 done
 

@@ -1,8 +1,9 @@
 #!/bin/sh
 # Build the SpotifyPi SD card image with Docker (works on Linux and macOS).
-#   ./build.sh               full build -> output/spotifypi-rpi2.img.xz
-#   ./build.sh menuconfig    tweak the Buildroot config
-#   ./build.sh clean         remove the cached build volume
+#   ./build.sh                        full build -> output/spotifypi-rpi2.img.xz (librespot)
+#   VARIANT=soloist ./build.sh        Spotify Soloist build -> output/spotifypi-soloist-rpi2.img.xz
+#   ./build.sh menuconfig             tweak the Buildroot config (VARIANT selects which)
+#   ./build.sh clean                  remove the cached build volume
 set -eu
 cd "$(dirname "$0")"
 IMAGE=spotifypi-builder
@@ -19,6 +20,7 @@ mkdir -p output
 # filesystem and bind mounts from macOS are slow.
 TTY=""; [ -t 0 ] && TTY="-it"
 docker run --rm $TTY --platform linux/amd64 \
+	-e VARIANT="${VARIANT:-librespot}" \
 	-v "$PWD":/src:ro \
 	-v "$VOLUME":/work \
 	-v "$PWD/output":/out \

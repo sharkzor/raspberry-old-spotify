@@ -222,3 +222,25 @@ func TestBoardSelection(t *testing.T) {
 		t.Fatal("unknown board accepted")
 	}
 }
+
+func TestSoloistArgsKeepKeyAndVolume(t *testing.T) {
+	cfg := defaultConfig()
+	cfg.Name = "Kitchen"
+	cfg.InitialVolume = 100
+	args := soloistArgs(cfg, "secret-key")
+	want := map[string]string{"-n": "Kitchen", "-k": "secret-key", "-i": "100"}
+	for i := 0; i+1 < len(args); i += 2 {
+		if v, ok := want[args[i]]; ok {
+			if args[i+1] != v {
+				t.Fatalf("%s = %q, want %q", args[i], args[i+1], v)
+			}
+			delete(want, args[i])
+		}
+	}
+	if len(want) != 0 {
+		t.Fatalf("missing flags: %v in %v", want, args)
+	}
+	if got := soloistPairArgs(cfg, "k"); got[0] != "--pair" {
+		t.Fatalf("pair args must start with --pair, got %v", got)
+	}
+}

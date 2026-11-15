@@ -11,6 +11,8 @@ var version = "dev"
 
 const (
 	librespotBin  = "/usr/bin/librespot"
+	soloistBin    = "/usr/bin/soloist"
+	pulseBin      = "/usr/bin/pulseaudio"
 	camilladspBin = "/usr/bin/camilladsp"
 	eventHook     = "/usr/bin/spotifypi-event"
 	// Playback side of the ALSA loopback (librespot) and its capture side (CamillaDSP).
@@ -60,6 +62,10 @@ func main() {
 		err = serve(addr)
 	case "run-librespot":
 		err = runLibrespot()
+	case "run-soloist":
+		err = runSoloist()
+	case "run-pulseaudio":
+		err = runPulseaudio()
 	case "run-camilladsp":
 		err = runCamilla()
 	case "event":
@@ -75,7 +81,7 @@ func main() {
 	case "version":
 		fmt.Println(version)
 	default:
-		err = fmt.Errorf("usage: spotifypi [serve [addr]|run-librespot|run-camilladsp|event|render-camilladsp|librespot-args|version]")
+		err = fmt.Errorf("usage: spotifypi [serve [addr]|run-librespot|run-soloist|run-pulseaudio|run-camilladsp|event|render-camilladsp|librespot-args|version]")
 	}
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "spotifypi:", err)

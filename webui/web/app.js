@@ -204,11 +204,36 @@ async function loadCards(current) {
 }
 
 // ---------------------------------------------------------------- status
+let isSoloist = null;
+let wasPairing = false;
+
+function applyVariant(soloist) {
+  isSoloist = soloist;
+  document.querySelectorAll(".lp-only").forEach(el => (el.hidden = soloist));
+  $("#soloist-card").hidden = !soloist;
+}
+
+function updateSoloist(s) {
+  $("#soloist-key-state").textContent = s.soloist_key_set ? "(set)" : "(not set)";
+  const pairing = !!s.soloist_pairing;
+  $("#soloist-pair-state").textContent = pairing
+    ? "Pairing… start playback in Spotify and choose SpotifyPi"
+    : (s.soloist_paired ? "Paired" : "Not paired");
+  $("#soloist-pair").disabled = pairing;
+  if (wasPairing && !pairing) {
+    toast(s.soloist_paired ? "Pairing complete" : "Pairing did not complete — see Logs (soloist)", !s.soloist_paired);
+  }
+  wasPairing = pairing;
+}
+
 async function refreshStatus() {
   try {
     const s = await api("status");
+    const soloist = s.variant === "soloist";
+    if (soloist !== isSoloist) applyVariant(soloist);
     const pill = (name, ok) => `<span class="pill ${ok ? "ok" : "bad"}">${name}</span>`;
-    $("#svc").innerHTML = pill("librespot", s.librespot) + pill("DSP", s.camilladsp);
+    $("#svc").innerHTML = pill(soloist ? "soloist" : "librespot", s.spotify) + pill("DSP", s.camilladsp);
+    if (soloist) updateSoloist(s);
     const np = s.now_playing || {};
     const state = np.state || "idle";
     $("#np-state").textContent = { playing: "▶ Playing", paused: "❚❚ Paused", stopped: "■ Stopped", idle: "Idle — select this device in the Spotify app" }[state] || state;
@@ -290,6 +315,18 @@ async function init() {
   of.onsubmit = async ev => {
     ev.preventDefault();
     try { toast((await api("output", formData(of))).status); } catch (e) { toast(e.message, true); }
+  };
+
+  const kf = $("#soloist-key-form");
+  kf.onsubmit = async ev => {
+    ev.preventDefault();
+    try {
+      toast((await api("soloist/key", { api_key: kf.elements.api_key.value })).status);
+      kf.reset();
+    } catch (e) { toast(e.message, true); }
+  };
+  $("#soloist-pair").onclick = async () => {
+    try { toast((await api("soloist/pair", {})).status); } catch (e) { toast(e.message, true); }
   };
 
   const pf = $("#password-form");

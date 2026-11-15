@@ -53,6 +53,8 @@ func serve(addr string) error {
 	mux.HandleFunc("GET /api/eq/export", s.handleExport)
 	mux.HandleFunc("GET /api/logs", s.handleLogs)
 	mux.HandleFunc("POST /api/spotify", s.handleSpotify)
+	mux.HandleFunc("POST /api/soloist/key", s.handleSoloistKey)
+	mux.HandleFunc("POST /api/soloist/pair", s.handleSoloistPair)
 	mux.HandleFunc("POST /api/eq", s.handleEQ)
 	mux.HandleFunc("POST /api/eq/parse", s.handleParse)
 	mux.HandleFunc("GET /api/board", s.handleGetBoard)
@@ -235,8 +237,12 @@ func (s *server) handleStatus(w http.ResponseWriter, r *http.Request) {
 		"ip":               ipAddrs(),
 		"uptime_s":         int(time.Since(bootTime).Seconds()),
 		"system_uptime_s":  systemUptime(),
-		"librespot":        servicePID("librespot") != 0,
+		"variant":          spotifyVariant(),
+		"spotify":          servicePID(spotifyVariant()) != 0,
 		"camilladsp":       servicePID("camilladsp") != 0,
+		"soloist_key_set":  fileExists(soloistKeyPath()),
+		"soloist_paired":   dirNotEmpty(soloistPersistDir()),
+		"soloist_pairing":  fileExists(pairingFlagPath()),
 		"now_playing":      readNowPlaying(),
 		"eq_unsaved":       liveErr == nil,
 		"settings_mounted": isMountpoint(dataDir),
@@ -247,7 +253,7 @@ func (s *server) handleStatus(w http.ResponseWriter, r *http.Request) {
 func (s *server) handleLogs(w http.ResponseWriter, r *http.Request) {
 	name := r.URL.Query().Get("service")
 	switch name {
-	case "librespot", "camilladsp", "spotifypi":
+	case "librespot", "soloist", "pulseaudio", "camilladsp", "spotifypi":
 	default:
 		writeErr(w, http.StatusBadRequest, errors.New("unknown service"))
 		return
@@ -281,10 +287,63 @@ func (s *server) handleSpotify(w http.ResponseWriter, r *http.Request) {
 		writeErr(w, http.StatusBadRequest, err)
 		return
 	}
-	if err := restartService("librespot"); err != nil {
-		log.Printf("restart librespot: %v", err)
+	if err := restartService(spotifyVariant()); err != nil {
+		log.Printf("restart %s: %v", spotifyVariant(), err)
 	}
 	writeJSON(w, map[string]string{"status": "saved, Spotify Connect restarting"})
+}
+
+// handleSoloistKey stores the Soloist API key on the settings partition. The
+// key is never returned by the API.
+func (s *server) handleSoloistKey(w http.ResponseWriter, r *http.Request) {
+	if spotifyVariant() != "soloist" {
+		writeErr(w, http.StatusBadRequest, errors.New("this image runs librespot, not Soloist"))
+		return
+	}
+	var req struct {
+		APIKey string `json:"api_key"`
+	}
+	if err := readJSON(r, &req); err != nil {
+		writeErr(w, http.StatusBadRequest, err)
+		return
+	}
+	key := strings.TrimSpace(req.APIKey)
+	if key == "" || len(key) > 256 || strings.ContainsAny(key, " \t\r\n") {
+		writeErr(w, http.StatusBadRequest, errors.New("invalid API key"))
+		return
+	}
+	err := withDataRW(func() error {
+		return writeFileAtomic(soloistKeyPath(), []byte(key+"\n"), 0o600)
+	})
+	if err != nil {
+		writeErr(w, http.StatusInternalServerError, err)
+		return
+	}
+	restartService("soloist")
+	writeJSON(w, map[string]string{"status": "API key saved, Soloist restarting"})
+}
+
+// handleSoloistPair starts the one-time pairing flow. It returns at once; the
+// UI polls /api/status for soloist_pairing and soloist_paired.
+func (s *server) handleSoloistPair(w http.ResponseWriter, r *http.Request) {
+	if spotifyVariant() != "soloist" {
+		writeErr(w, http.StatusBadRequest, errors.New("this image runs librespot, not Soloist"))
+		return
+	}
+	key, err := readSoloistKey()
+	if err != nil {
+		writeErr(w, http.StatusBadRequest, errors.New("save an API key first"))
+		return
+	}
+	if err := startPairing(key); err != nil {
+		if errors.Is(err, errPairingBusy) {
+			writeErr(w, http.StatusConflict, err)
+			return
+		}
+		writeErr(w, http.StatusInternalServerError, err)
+		return
+	}
+	writeJSON(w, map[string]string{"status": "pairing started: within 10 minutes, open Spotify and transfer playback to this device"})
 }
 
 type eqReq struct {

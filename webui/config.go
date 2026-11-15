@@ -134,6 +134,18 @@ func saveConfig(cfg Config) error {
 	cfgMu.Lock()
 	defer cfgMu.Unlock()
 
+	return withDataRW(func() error {
+		return writeFileAtomic(configPath(), b, 0o600)
+	})
+}
+
+var dataMu sync.Mutex
+
+// withDataRW runs fn with the settings partition temporarily writable.
+func withDataRW(fn func() error) error {
+	dataMu.Lock()
+	defer dataMu.Unlock()
+
 	if isMountpoint(dataDir) {
 		if err := remount(dataDir, "rw"); err != nil {
 			return fmt.Errorf("cannot make settings partition writable: %w", err)
@@ -144,7 +156,7 @@ func saveConfig(cfg Config) error {
 			}
 		}()
 	}
-	return writeFileAtomic(configPath(), b, 0o600)
+	return fn()
 }
 
 func writeFileAtomic(path string, data []byte, perm os.FileMode) error {
