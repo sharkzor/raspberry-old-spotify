@@ -121,9 +121,8 @@ Read these limits before you use it:
 * **Proprietary and time-limited.** Soloist is downloaded from Spotify's CDN at
   build time and is not redistributed in this repo. Each build expires 90 days
   after it was made, so rebuild to refresh it.
-* **Needs your own API key.** Create one in the Spotify Developer Dashboard and
-  enter it in the web UI. It is stored on the settings partition and is visible
-  to root through the process list.
+* **Needs your own API key.** It is stored on the settings partition and is
+  visible to root through the process list. See below for how to get one.
 * **Pair once.** Press *Pair with Spotify*, then within 10 minutes start playback
   in the Spotify app and pick SpotifyPi. The session is saved to `/data`. Token
   refreshes after that live in RAM, so they are lost on reboot. The saved session
@@ -131,6 +130,21 @@ Read these limits before you use it:
 * **No bitrate, volume-control or Now Playing settings.** Soloist does not expose
   them. Output still goes through CamillaDSP, so the EQ and DAC board work the same.
 * Soloist's audio goes through PulseAudio into the ALSA loopback that CamillaDSP reads.
+
+### Getting the API key
+
+The Soloist key is **not** a normal Spotify app: don't use "Create app", which asks
+for a redirect URI. No redirect URI is needed.
+
+1. Log in to the [Spotify for Developers dashboard](https://developer.spotify.com/dashboard)
+   with a **Premium** account (required to generate the key).
+2. Open <https://developer.spotify.com/dashboard/soloist> (*Spotify Soloist API Key*)
+   and generate a key.
+3. Paste it into the *Spotify Soloist* card in the web UI and press *Save key*.
+4. Press *Pair with Spotify*, then within 10 minutes start playback in the Spotify
+   app and choose SpotifyPi.
+
+Never share the key or commit it to a repo.
 
 
 You need Docker (on macOS, Docker Desktop with Rosetta). The build takes about
